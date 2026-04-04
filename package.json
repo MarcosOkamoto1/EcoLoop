@@ -1,0 +1,10 @@
+{
+  "name": "ecoloop",
+  "private": true,
+  "scripts": {
+    "dev:api": "cd apps/api && npm run start:dev",
+    "dev:web": "cd apps/web && npm run dev",
+    "migrate": "cd apps/api && npx prisma migrate dev",
+    "studio": "cd apps/api && npx prisma studio"
+  }
+}

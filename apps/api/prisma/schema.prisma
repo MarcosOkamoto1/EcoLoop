@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CITIZEN
+  COOPERATIVE
+  COMPANY
+}
+
+enum CollectionStatus {
+  PENDING
+  ACCEPTED
+  IN_ROUTE
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  password     String
+  role         Role
+  phone        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  collections  Collection[]
+  cooperative  Cooperative?
+  company      Company?
+}
+
+model Cooperative {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  cnpj         String   @unique
+  address      String
+  latitude     Float
+  longitude    Float
+  capacity     Int      @default(1000)
+  collections  Collection[]
+  points       CollectionPoint[]
+  createdAt    DateTime @default(now())
+}
+
+model Company {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  cnpj         String   @unique
+  sector       String
+  collections  Collection[]
+  createdAt    DateTime @default(now())
+}
+
+model CollectionPoint {
+  id            String      @id @default(uuid())
+  cooperativeId String
+  cooperative   Cooperative @relation(fields: [cooperativeId], references: [id])
+  name          String
+  address       String
+  latitude      Float
+  longitude     Float
+  acceptedItems String[]
+  active        Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+}
+
+model ElectronicItem {
+  id          String   @id @default(uuid())
+  name        String
+  category    String
+  description String?
+  collection  Collection @relation(fields: [collectionId], references: [id])
+  collectionId String
+}
+
+model Collection {
+  id              String           @id @default(uuid())
+  citizenId       String
+  citizen         User             @relation(fields: [citizenId], references: [id])
+  cooperativeId   String?
+  cooperative     Cooperative?     @relation(fields: [cooperativeId], references: [id])
+  companyId       String?
+  company         Company?         @relation(fields: [companyId], references: [id])
+  status          CollectionStatus @default(PENDING)
+  scheduledDate   DateTime
+  address         String
+  latitude        Float?
+  longitude       Float?
+  notes           String?
+  weightKg        Float?
+  items           ElectronicItem[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
