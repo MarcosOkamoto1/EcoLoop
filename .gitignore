@@ -2,3 +2,8 @@ node_modules/
 dist/
 .env
 *.log
+repomix-output.txt
+.DS_Store
+Thumbs.db
+coverage/
+.nest/
