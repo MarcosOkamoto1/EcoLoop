@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import AuthPage from "./pages/auth/AuthPage";
 import CitizenDashboard from "./pages/citizen/CitizenDashboard";
+import CooperativeDashboard from "./pages/cooperative/CooperativeDashboard";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -22,6 +23,10 @@ export default function App() {
 
   if (user.role === "CITIZEN") {
     return <CitizenDashboard user={user} onLogout={handleLogout} />;
+  }
+
+  if (user.role === "COOPERATIVE") {
+    return <CooperativeDashboard user={user} onLogout={handleLogout} />;
   }
 
   return (

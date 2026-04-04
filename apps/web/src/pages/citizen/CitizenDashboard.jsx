@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../../services/api";
 
 export default function CitizenDashboard({ user, onLogout }) {
   const [tab, setTab] = useState("schedule");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  // Novos estados para os dados dinâmicos
+  const [myCollections, setMyCollections] = useState([]);
+  const [stats, setStats] = useState({ recycled: 0, pending: 0, points: 0 });
+
   const [form, setForm] = useState({
     address: "",
     scheduledDate: "",
@@ -13,7 +18,6 @@ export default function CitizenDashboard({ user, onLogout }) {
     items: [],
   });
 
-  // Opções fictícias mantidas
   const itemOptions = [
     { id: "smartphone", label: "Smartphone" },
     { id: "notebook", label: "Notebook" },
@@ -24,6 +28,33 @@ export default function CitizenDashboard({ user, onLogout }) {
     { id: "cabos", label: "Cabos" },
     { id: "bateria", label: "Bateria" },
   ];
+
+  // Busca os dados reais ao carregar a página
+  useEffect(() => {
+    fetchMyData();
+  }, []);
+
+  const fetchMyData = async () => {
+    try {
+      const { data } = await api.get("/collections/my");
+      setMyCollections(data);
+
+      // Calculando as estatísticas dinamicamente
+      const pendingCount = data.filter((c) => c.status === "PENDING").length;
+      const completedCount = data.filter(
+        (c) => c.status === "COMPLETED",
+      ).length;
+
+      // Simulação: Vamos fingir que cada coleta finalizada gerou em média 25kg e rendeu 350 pontos
+      setStats({
+        recycled: completedCount * 25,
+        pending: pendingCount,
+        points: completedCount * 350,
+      });
+    } catch (error) {
+      console.error("Erro ao buscar dados do cidadão", error);
+    }
+  };
 
   const toggleItem = (id) => {
     setForm((prev) => ({
@@ -38,7 +69,15 @@ export default function CitizenDashboard({ user, onLogout }) {
     e.preventDefault();
     setLoading(true);
     try {
-      // Simulação de sucesso fictícia
+      const dateTimeString = `${form.scheduledDate}T${form.scheduledTime}:00`;
+
+      await api.post("/collections", {
+        address: form.address,
+        scheduledDate: new Date(dateTimeString).toISOString(),
+        notes: form.notes,
+        items: form.items,
+      });
+
       setSuccess(true);
       setForm({
         address: "",
@@ -48,8 +87,11 @@ export default function CitizenDashboard({ user, onLogout }) {
         items: [],
       });
       setTimeout(() => setSuccess(false), 4000);
+
+      // Atualiza os cards dinamicamente após criar uma nova coleta
+      fetchMyData();
     } catch (err) {
-      alert("Erro ao agendar. Tente novamente.");
+      alert("Erro ao agendar a coleta. Verifique os dados e tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -78,7 +120,6 @@ export default function CitizenDashboard({ user, onLogout }) {
                 Cidadão Consciente
               </span>
             </div>
-            {/* Avatar fictício */}
             <div className="w-11 h-11 bg-gray-900 rounded-full flex items-center justify-center text-white font-bold text-lg ring-2 ring-gray-100">
               {user.name.charAt(0).toUpperCase()}
             </div>
@@ -92,9 +133,9 @@ export default function CitizenDashboard({ user, onLogout }) {
         </div>
       </header>
 
-      {/* Main Content (Ocupa 100% da largura) */}
+      {/* Main Content */}
       <main className="flex-grow w-full max-w-[90rem] mx-auto p-6 md:p-8 space-y-10">
-        {/* Seção de Resumo (Simulação Estilo Nexchange) */}
+        {/* Seção de Resumo com DADOS DINÂMICOS */}
         <section>
           <div className="mb-6">
             <h2 className="text-xl font-bold text-gray-950 tracking-tight">
@@ -107,52 +148,49 @@ export default function CitizenDashboard({ user, onLogout }) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Card fictício 1 */}
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-1.5 transition-all hover:shadow-md hover:border-green-100">
               <span className="text-sm text-gray-400 font-medium">
-                Total Reciclado
+                Total Reciclado Estimado
               </span>
               <span className="text-3xl font-extrabold text-gray-950 tracking-tight">
-                125 <span className="text-lg font-bold text-gray-400">kg</span>
+                {stats.recycled}{" "}
+                <span className="text-lg font-bold text-gray-400">kg</span>
               </span>
               <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full self-start mt-1">
-                +12% este mês
+                Atualizado hoje
               </span>
             </div>
-            {/* Card fictício 2 */}
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-1.5 transition-all hover:shadow-md hover:border-green-100">
               <span className="text-sm text-gray-400 font-medium">
                 Agendamentos Pendentes
               </span>
               <span className="text-3xl font-extrabold text-gray-950 tracking-tight">
-                02{" "}
+                {stats.pending.toString().padStart(2, "0")}{" "}
                 <span className="text-lg font-bold text-gray-400">coletas</span>
               </span>
               <span className="text-xs font-semibold text-gray-600 bg-gray-50 px-2 py-0.5 rounded-full self-start mt-1">
-                Aguardando confirmação
+                Aguardando cooperativa
               </span>
             </div>
-            {/* Card fictício 3 */}
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-1.5 transition-all hover:shadow-md hover:border-green-100">
               <span className="text-sm text-gray-400 font-medium">
-                Pontos Gerados (Simulação)
+                Pontos Gerados
               </span>
               <span className="text-3xl font-extrabold text-emerald-600 tracking-tight">
-                1.450{" "}
+                {stats.points}{" "}
                 <span className="text-lg font-bold text-emerald-400">pts</span>
               </span>
               <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full self-start mt-1">
                 Resgatável em breve
               </span>
             </div>
-            {/* Card fictício 4 (Call to Action) */}
             <div className="bg-green-600 p-6 rounded-3xl shadow-lg flex flex-col justify-between text-white transition-all hover:bg-green-700">
               <span className="text-base font-bold leading-tight">
                 Pronto para o próximo descarte?
               </span>
               <button
                 onClick={() => setTab("schedule")}
-                className="bg-white text-green-700 text-sm font-bold py-2 px-4 rounded-xl mt-3 self-start shadow-inner"
+                className="bg-white text-green-700 text-sm font-bold py-2 px-4 rounded-xl mt-3 self-start shadow-inner hover:bg-green-50 transition-colors"
               >
                 Novo Agendamento
               </button>
@@ -160,6 +198,7 @@ export default function CitizenDashboard({ user, onLogout }) {
           </div>
         </section>
 
+        {/* ... Restante do JSX (Abas e Formulário continuam iguais) ... */}
         {/* Abas de Navegação (iOS style) */}
         <div className="max-w-md mx-auto flex bg-gray-100/80 rounded-2xl p-1.5 border border-gray-200/50">
           <button
@@ -176,7 +215,7 @@ export default function CitizenDashboard({ user, onLogout }) {
           </button>
         </div>
 
-        {/* Conteúdo das Abas (Card Elegante) */}
+        {/* Conteúdo das Abas */}
         {tab === "schedule" && (
           <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 animate-in fade-in duration-300 max-w-5xl mx-auto">
             <div className="mb-8">
@@ -192,8 +231,8 @@ export default function CitizenDashboard({ user, onLogout }) {
 
             {success && (
               <div className="bg-emerald-50 border border-emerald-100 text-emerald-800 text-base px-5 py-4 rounded-2xl mb-6 font-semibold animate-in slide-in-from-top-2">
-                Coleta agendada com sucesso! Uma cooperativa entrará em contato
-                em breve.
+                Coleta agendada com sucesso! Você pode acompanhar o status nos
+                seus cards acima.
               </div>
             )}
 
@@ -311,12 +350,6 @@ export default function CitizenDashboard({ user, onLogout }) {
                   credenciado e ganhe pontos extra.
                 </p>
               </div>
-              {/* Barra de pesquisa fictícia estilo Nexchange */}
-              <input
-                type="text"
-                placeholder="Pesquisar ponto..."
-                className="px-4 py-2 border border-gray-200 rounded-xl text-sm bg-gray-50"
-              />
             </div>
 
             <div className="space-y-4">
@@ -333,18 +366,6 @@ export default function CitizenDashboard({ user, onLogout }) {
                   distance: "2.8 km",
                   items: "Celulares, tablets, notebooks",
                 },
-                {
-                  name: "Recicla+ Flores (Fictício)",
-                  address: "Av. Constantino Nery, 890",
-                  distance: "4.1 km",
-                  items: "Eletrodomésticos grandes",
-                },
-                {
-                  name: "Ponto Verde Alvorada (Fictício)",
-                  address: "Rua do Comércio, 45",
-                  distance: "5.5 km",
-                  items: "Pilhas e baterias",
-                },
               ].map((point, i) => (
                 <div
                   key={i}
@@ -360,16 +381,10 @@ export default function CitizenDashboard({ user, onLogout }) {
                     <p className="text-sm text-gray-500 mt-0.5">
                       {point.address}
                     </p>
-                    <p className="text-xs text-green-600 bg-green-50 font-semibold px-2 py-0.5 rounded mt-2 inline-block">
-                      Aceita: {point.items}
-                    </p>
                   </div>
                   <div className="flex flex-col items-end gap-1.5">
                     <span className="text-sm font-semibold text-green-700 bg-green-100/70 px-3 py-1 rounded-xl">
                       {point.distance}
-                    </span>
-                    <span className="text-xs text-gray-400 font-medium">
-                      de você
                     </span>
                   </div>
                 </div>
@@ -378,14 +393,6 @@ export default function CitizenDashboard({ user, onLogout }) {
           </div>
         )}
       </main>
-
-      {/* Footer Fictício */}
-      <footer className="w-full border-t border-gray-100 mt-12 bg-white">
-        <div className="max-w-[90rem] mx-auto px-6 py-6 text-center text-gray-400 text-sm font-medium">
-          © {new Date().getFullYear()} EcoLoop. Plataforma Demonstrativa (Dados
-          Fictícios).
-        </div>
-      </footer>
     </div>
   );
 }
