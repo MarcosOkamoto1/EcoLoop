@@ -13,6 +13,7 @@ export default function CitizenDashboard({ user, onLogout }) {
     items: [],
   });
 
+  // Opções fictícias mantidas
   const itemOptions = [
     { id: "smartphone", label: "Smartphone" },
     { id: "notebook", label: "Notebook" },
@@ -37,6 +38,7 @@ export default function CitizenDashboard({ user, onLogout }) {
     e.preventDefault();
     setLoading(true);
     try {
+      // Simulação de sucesso fictícia
       setSuccess(true);
       setForm({
         address: "",
@@ -54,63 +56,159 @@ export default function CitizenDashboard({ user, onLogout }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-        <h1 className="text-xl font-bold text-green-700">EcoLoop</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-500">Olá, {user.name}</span>
-          <button
-            onClick={onLogout}
-            className="text-sm text-red-500 hover:text-red-700"
-          >
-            Sair
-          </button>
+    <div className="min-h-screen w-full bg-gray-50/50 flex flex-col font-sans selection:bg-green-100 selection:text-green-900 overflow-x-hidden">
+      {/* Header Premium (Ocupa 100% da largura) */}
+      <header className="w-full bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-[90rem] mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-950 rounded-xl flex items-center justify-center font-bold text-green-400 text-xl shadow-inner">
+              E
+            </div>
+            <h1 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500 tracking-tight">
+              Eco<span className="text-gray-900">Loop</span>
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <span className="block text-sm font-semibold text-gray-950">
+                {user.name}
+              </span>
+              <span className="block text-xs text-gray-400 font-medium">
+                Cidadão Consciente
+              </span>
+            </div>
+            {/* Avatar fictício */}
+            <div className="w-11 h-11 bg-gray-900 rounded-full flex items-center justify-center text-white font-bold text-lg ring-2 ring-gray-100">
+              {user.name.charAt(0).toUpperCase()}
+            </div>
+            <button
+              onClick={onLogout}
+              className="ml-2 text-sm font-semibold text-gray-500 hover:text-red-600 transition-colors bg-gray-100/70 px-4 py-2 rounded-full"
+            >
+              Sair
+            </button>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto p-6">
-        <div className="flex gap-2 bg-gray-100 rounded-xl p-1 mb-6">
+      {/* Main Content (Ocupa 100% da largura) */}
+      <main className="flex-grow w-full max-w-[90rem] mx-auto p-6 md:p-8 space-y-10">
+        {/* Seção de Resumo (Simulação Estilo Nexchange) */}
+        <section>
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-950 tracking-tight">
+              Bem-vindo ao seu Dashboard
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Aqui você gerencia o seu descarte eletrônico e monitora seu
+              impacto.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Card fictício 1 */}
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-1.5 transition-all hover:shadow-md hover:border-green-100">
+              <span className="text-sm text-gray-400 font-medium">
+                Total Reciclado
+              </span>
+              <span className="text-3xl font-extrabold text-gray-950 tracking-tight">
+                125 <span className="text-lg font-bold text-gray-400">kg</span>
+              </span>
+              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full self-start mt-1">
+                +12% este mês
+              </span>
+            </div>
+            {/* Card fictício 2 */}
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-1.5 transition-all hover:shadow-md hover:border-green-100">
+              <span className="text-sm text-gray-400 font-medium">
+                Agendamentos Pendentes
+              </span>
+              <span className="text-3xl font-extrabold text-gray-950 tracking-tight">
+                02{" "}
+                <span className="text-lg font-bold text-gray-400">coletas</span>
+              </span>
+              <span className="text-xs font-semibold text-gray-600 bg-gray-50 px-2 py-0.5 rounded-full self-start mt-1">
+                Aguardando confirmação
+              </span>
+            </div>
+            {/* Card fictício 3 */}
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-1.5 transition-all hover:shadow-md hover:border-green-100">
+              <span className="text-sm text-gray-400 font-medium">
+                Pontos Gerados (Simulação)
+              </span>
+              <span className="text-3xl font-extrabold text-emerald-600 tracking-tight">
+                1.450{" "}
+                <span className="text-lg font-bold text-emerald-400">pts</span>
+              </span>
+              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full self-start mt-1">
+                Resgatável em breve
+              </span>
+            </div>
+            {/* Card fictício 4 (Call to Action) */}
+            <div className="bg-green-600 p-6 rounded-3xl shadow-lg flex flex-col justify-between text-white transition-all hover:bg-green-700">
+              <span className="text-base font-bold leading-tight">
+                Pronto para o próximo descarte?
+              </span>
+              <button
+                onClick={() => setTab("schedule")}
+                className="bg-white text-green-700 text-sm font-bold py-2 px-4 rounded-xl mt-3 self-start shadow-inner"
+              >
+                Novo Agendamento
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Abas de Navegação (iOS style) */}
+        <div className="max-w-md mx-auto flex bg-gray-100/80 rounded-2xl p-1.5 border border-gray-200/50">
           <button
             onClick={() => setTab("schedule")}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${tab === "schedule" ? "bg-white text-green-700 shadow" : "text-gray-400"}`}
+            className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${tab === "schedule" ? "bg-white text-gray-950 shadow ring-1 ring-black/5" : "text-gray-500 hover:text-gray-700"}`}
           >
-            Agendar Coleta
+            🗓️ Agendar Coleta
           </button>
           <button
             onClick={() => setTab("points")}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${tab === "points" ? "bg-white text-green-700 shadow" : "text-gray-400"}`}
+            className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${tab === "points" ? "bg-white text-gray-950 shadow ring-1 ring-black/5" : "text-gray-500 hover:text-gray-700"}`}
           >
-            Pontos de Coleta
+            📍 Pontos de Coleta
           </button>
         </div>
 
+        {/* Conteúdo das Abas (Card Elegante) */}
         {tab === "schedule" && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h2 className="text-lg font-bold text-gray-800 mb-1">
-              Agendar coleta domiciliar
-            </h2>
-            <p className="text-sm text-gray-400 mb-6">
-              Informe os dados e agendaremos a coleta na sua casa.
-            </p>
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 animate-in fade-in duration-300 max-w-5xl mx-auto">
+            <div className="mb-8">
+              <h2 className="text-2xl font-extrabold text-gray-950 tracking-tight">
+                Nova solicitação de coleta domiciliar
+              </h2>
+              <p className="text-base text-gray-500 mt-1.5 leading-relaxed max-w-2xl">
+                Preencha os dados abaixo e as cooperativas parceiras serão
+                notificadas para agendar a retirada dos seus eletrônicos na sua
+                residência.
+              </p>
+            </div>
 
             {success && (
-              <div className="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-xl mb-4">
-                Coleta agendada com sucesso!
+              <div className="bg-emerald-50 border border-emerald-100 text-emerald-800 text-base px-5 py-4 rounded-2xl mb-6 font-semibold animate-in slide-in-from-top-2">
+                Coleta agendada com sucesso! Uma cooperativa entrará em contato
+                em breve.
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-7">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">
-                  Itens para descartar
+                <label className="block text-base font-semibold text-gray-700 mb-2.5 ml-1">
+                  Selecione os itens para descartar
                 </label>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
                   {itemOptions.map((item) => (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => toggleItem(item.id)}
-                      className={`px-3 py-2 rounded-xl text-sm border transition-all ${form.items.includes(item.id) ? "bg-green-600 text-white border-green-600" : "bg-white text-gray-600 border-gray-200 hover:border-green-300"}`}
+                      className={`px-4 py-3 rounded-xl text-sm font-medium border transition-all duration-200 text-center flex items-center justify-center ${form.items.includes(item.id) ? "bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20" : "bg-white text-gray-700 border-gray-200 hover:border-green-300"}`}
                     >
                       {item.label}
                     </button>
@@ -119,8 +217,8 @@ export default function CitizenDashboard({ user, onLogout }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">
-                  Endereço completo
+                <label className="block text-base font-semibold text-gray-700 mb-1.5 ml-1">
+                  Endereço completo para retirada
                 </label>
                 <input
                   type="text"
@@ -128,16 +226,16 @@ export default function CitizenDashboard({ user, onLogout }) {
                   onChange={(e) =>
                     setForm({ ...form, address: e.target.value })
                   }
-                  placeholder="Rua, número, bairro, cidade"
+                  placeholder="Rua, número, bairro, cidade (ex: Rua Floriano Peixoto, 123 - Centro)"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-base transition-all duration-200 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">
-                    Data
+                  <label className="block text-base font-semibold text-gray-700 mb-1.5 ml-1">
+                    Melhor data para retirada
                   </label>
                   <input
                     type="date"
@@ -147,12 +245,12 @@ export default function CitizenDashboard({ user, onLogout }) {
                     }
                     required
                     min={new Date().toISOString().split("T")[0]}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-base transition-all duration-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 cursor-pointer"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">
-                    Horário
+                  <label className="block text-base font-semibold text-gray-700 mb-1.5 ml-1">
+                    Melhor horário
                   </label>
                   <select
                     value={form.scheduledTime}
@@ -160,9 +258,9 @@ export default function CitizenDashboard({ user, onLogout }) {
                       setForm({ ...form, scheduledTime: e.target.value })
                     }
                     required
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-base transition-all duration-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 cursor-pointer appearance-none"
                   >
-                    <option value="">Selecione</option>
+                    <option value="">Selecione um horário</option>
                     <option value="08:00">08:00</option>
                     <option value="09:00">09:00</option>
                     <option value="10:00">10:00</option>
@@ -176,83 +274,118 @@ export default function CitizenDashboard({ user, onLogout }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">
+                <label className="block text-base font-semibold text-gray-700 mb-1.5 ml-1">
                   Observações (opcional)
                 </label>
                 <textarea
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  placeholder="Ex: portão azul, ligar antes de chegar..."
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-400 resize-none"
+                  placeholder="Ex: portão azul, ligar antes de chegar, itens pesados..."
+                  rows={4}
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-base transition-all duration-200 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 resize-none"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading || form.items.length === 0}
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 active:bg-green-700 text-white font-bold py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-green-600/30 disabled:opacity-60 disabled:cursor-not-allowed text-base mt-2 transform active:scale-[0.99]"
               >
-                {loading ? "Agendando..." : "Confirmar agendamento"}
+                {loading
+                  ? "Processando Agendamento..."
+                  : "Confirmar Solicitação de Coleta"}
               </button>
             </form>
           </div>
         )}
 
         {tab === "points" && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h2 className="text-lg font-bold text-gray-800 mb-1">
-              Pontos de coleta próximos
-            </h2>
-            <p className="text-sm text-gray-400 mb-6">
-              Leve seus eletrônicos diretamente a um ponto de coleta.
-            </p>
-            <div className="space-y-3">
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 animate-in fade-in duration-300 max-w-5xl mx-auto">
+            <div className="mb-8 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-extrabold text-gray-950 tracking-tight">
+                  Pontos de Coleta Cadastrados (Fictícios)
+                </h2>
+                <p className="text-base text-gray-500 mt-1.5 leading-relaxed">
+                  Leve seus eletrônicos diretamente a um ponto de coleta
+                  credenciado e ganhe pontos extra.
+                </p>
+              </div>
+              {/* Barra de pesquisa fictícia estilo Nexchange */}
+              <input
+                type="text"
+                placeholder="Pesquisar ponto..."
+                className="px-4 py-2 border border-gray-200 rounded-xl text-sm bg-gray-50"
+              />
+            </div>
+
+            <div className="space-y-4">
               {[
                 {
-                  name: "Cooperativa Verde Manaus",
+                  name: "Cooperativa Verde Manaus (Fictício)",
                   address: "Av. Brasil, 1234 - Centro",
                   distance: "1.2 km",
                   items: "Todos os eletrônicos",
                 },
                 {
-                  name: "EcoPoint Adrianópolis",
+                  name: "EcoPoint Adrianópolis (Fictício)",
                   address: "Rua 10 de Julho, 567",
                   distance: "2.8 km",
                   items: "Celulares, tablets, notebooks",
                 },
                 {
-                  name: "Recicla+ Flores",
+                  name: "Recicla+ Flores (Fictício)",
                   address: "Av. Constantino Nery, 890",
                   distance: "4.1 km",
-                  items: "Eletrodomésticos",
+                  items: "Eletrodomésticos grandes",
+                },
+                {
+                  name: "Ponto Verde Alvorada (Fictício)",
+                  address: "Rua do Comércio, 45",
+                  distance: "5.5 km",
+                  items: "Pilhas e baterias",
                 },
               ].map((point, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-4 p-4 border border-gray-100 rounded-xl hover:border-green-200 transition-all"
+                  className="grid grid-cols-1 md:grid-cols-[auto,1fr,auto] items-center gap-5 p-5 border border-gray-100 rounded-2xl hover:border-green-200 hover:bg-gray-50/50 transition-all cursor-pointer"
                 >
-                  <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0 text-green-600 font-bold">
-                    ♻
+                  <div className="w-12 h-12 bg-green-100/70 rounded-2xl flex items-center justify-center flex-shrink-0 text-green-700 font-bold text-lg shadow-inner">
+                    ♻️
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-800 text-sm">
+                  <div>
+                    <p className="font-semibold text-gray-950 text-base">
                       {point.name}
                     </p>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-sm text-gray-500 mt-0.5">
                       {point.address}
                     </p>
-                    <p className="text-xs text-gray-400">{point.items}</p>
+                    <p className="text-xs text-green-600 bg-green-50 font-semibold px-2 py-0.5 rounded mt-2 inline-block">
+                      Aceita: {point.items}
+                    </p>
                   </div>
-                  <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-lg">
-                    {point.distance}
-                  </span>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className="text-sm font-semibold text-green-700 bg-green-100/70 px-3 py-1 rounded-xl">
+                      {point.distance}
+                    </span>
+                    <span className="text-xs text-gray-400 font-medium">
+                      de você
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
       </main>
+
+      {/* Footer Fictício */}
+      <footer className="w-full border-t border-gray-100 mt-12 bg-white">
+        <div className="max-w-[90rem] mx-auto px-6 py-6 text-center text-gray-400 text-sm font-medium">
+          © {new Date().getFullYear()} EcoLoop. Plataforma Demonstrativa (Dados
+          Fictícios).
+        </div>
+      </footer>
     </div>
   );
 }
