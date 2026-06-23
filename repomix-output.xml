@@ -1,0 +1,2652 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+apps/
+  api/
+    prisma/
+      migrations/
+        20260404155624_init/
+          migration.sql
+        migration_lock.toml
+      schema.prisma
+    src/
+      auth/
+        dto/
+          login.dto.ts
+          register.dto.ts
+        auth.controller.ts
+        auth.module.ts
+        auth.service.ts
+        jwt.strategy.ts
+      collections/
+        dto/
+          create-collection.dto.ts
+        collections.controller.ts
+        collections.module.ts
+        collections.service.ts
+      prisma/
+        prisma.module.ts
+        prisma.service.ts
+      app.controller.spec.ts
+      app.controller.ts
+      app.module.ts
+      app.service.ts
+      main.ts
+    test/
+      app.e2e-spec.ts
+      jest-e2e.json
+    .gitignore
+    .prettierrc
+    eslint.config.mjs
+    nest-cli.json
+    package.json
+    README.md
+    tsconfig.build.json
+    tsconfig.json
+  web/
+    public/
+      favicon.svg
+      icons.svg
+    src/
+      assets/
+        hero.png
+        react.svg
+        vite.svg
+      pages/
+        auth/
+          AuthPage.jsx
+        citizen/
+          CitizenDashboard.jsx
+        cooperative/
+          CooperativeDashboard.jsx
+      services/
+        api.js
+      App.css
+      App.jsx
+      index.css
+      main.jsx
+    .gitignore
+    eslint.config.js
+    index.html
+    package.json
+    postcss.config.js
+    prisma.config.ts
+    README.md
+    tailwind.config.js
+    vite.config.js
+.gitignore
+package.json
+README.md
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="apps/api/prisma/migrations/20260404155624_init/migration.sql">
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('CITIZEN', 'COOPERATIVE', 'COMPANY');
+
+-- CreateEnum
+CREATE TYPE "CollectionStatus" AS ENUM ('PENDING', 'ACCEPTED', 'IN_ROUTE', 'COMPLETED', 'CANCELLED');
+
+-- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "role" "Role" NOT NULL,
+    "phone" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Cooperative" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "cnpj" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "latitude" DOUBLE PRECISION NOT NULL,
+    "longitude" DOUBLE PRECISION NOT NULL,
+    "capacity" INTEGER NOT NULL DEFAULT 1000,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Cooperative_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Company" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "cnpj" TEXT NOT NULL,
+    "sector" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Company_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CollectionPoint" (
+    "id" TEXT NOT NULL,
+    "cooperativeId" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "latitude" DOUBLE PRECISION NOT NULL,
+    "longitude" DOUBLE PRECISION NOT NULL,
+    "acceptedItems" TEXT[],
+    "active" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "CollectionPoint_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ElectronicItem" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
+    "description" TEXT,
+    "collectionId" TEXT NOT NULL,
+
+    CONSTRAINT "ElectronicItem_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Collection" (
+    "id" TEXT NOT NULL,
+    "citizenId" TEXT NOT NULL,
+    "cooperativeId" TEXT,
+    "companyId" TEXT,
+    "status" "CollectionStatus" NOT NULL DEFAULT 'PENDING',
+    "scheduledDate" TIMESTAMP(3) NOT NULL,
+    "address" TEXT NOT NULL,
+    "latitude" DOUBLE PRECISION,
+    "longitude" DOUBLE PRECISION,
+    "notes" TEXT,
+    "weightKg" DOUBLE PRECISION,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Collection_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Cooperative_userId_key" ON "Cooperative"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Cooperative_cnpj_key" ON "Cooperative"("cnpj");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Company_userId_key" ON "Company"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Company_cnpj_key" ON "Company"("cnpj");
+
+-- AddForeignKey
+ALTER TABLE "Cooperative" ADD CONSTRAINT "Cooperative_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Company" ADD CONSTRAINT "Company_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CollectionPoint" ADD CONSTRAINT "CollectionPoint_cooperativeId_fkey" FOREIGN KEY ("cooperativeId") REFERENCES "Cooperative"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ElectronicItem" ADD CONSTRAINT "ElectronicItem_collectionId_fkey" FOREIGN KEY ("collectionId") REFERENCES "Collection"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Collection" ADD CONSTRAINT "Collection_citizenId_fkey" FOREIGN KEY ("citizenId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Collection" ADD CONSTRAINT "Collection_cooperativeId_fkey" FOREIGN KEY ("cooperativeId") REFERENCES "Cooperative"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Collection" ADD CONSTRAINT "Collection_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "Company"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+</file>
+
+<file path="apps/api/prisma/migrations/migration_lock.toml">
+# Please do not edit this file manually
+# It should be added in your version-control system (i.e. Git)
+provider = "postgresql"
+</file>
+
+<file path="apps/api/prisma/schema.prisma">
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CITIZEN
+  COOPERATIVE
+  COMPANY
+}
+
+enum CollectionStatus {
+  PENDING
+  ACCEPTED
+  IN_ROUTE
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  password     String
+  role         Role
+  phone        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  collections  Collection[]
+  cooperative  Cooperative?
+  company      Company?
+}
+
+model Cooperative {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  cnpj         String   @unique
+  address      String
+  latitude     Float
+  longitude    Float
+  capacity     Int      @default(1000)
+  collections  Collection[]
+  points       CollectionPoint[]
+  createdAt    DateTime @default(now())
+}
+
+model Company {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  cnpj         String   @unique
+  sector       String
+  collections  Collection[]
+  createdAt    DateTime @default(now())
+}
+
+model CollectionPoint {
+  id            String      @id @default(uuid())
+  cooperativeId String
+  cooperative   Cooperative @relation(fields: [cooperativeId], references: [id])
+  name          String
+  address       String
+  latitude      Float
+  longitude     Float
+  acceptedItems String[]
+  active        Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+}
+
+model ElectronicItem {
+  id          String   @id @default(uuid())
+  name        String
+  category    String
+  description String?
+  collection  Collection @relation(fields: [collectionId], references: [id])
+  collectionId String
+}
+
+model Collection {
+  id              String           @id @default(uuid())
+  citizenId       String
+  citizen         User             @relation(fields: [citizenId], references: [id])
+  cooperativeId   String?
+  cooperative     Cooperative?     @relation(fields: [cooperativeId], references: [id])
+  companyId       String?
+  company         Company?         @relation(fields: [companyId], references: [id])
+  status          CollectionStatus @default(PENDING)
+  scheduledDate   DateTime
+  address         String
+  latitude        Float?
+  longitude       Float?
+  notes           String?
+  weightKg        Float?
+  items           ElectronicItem[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+</file>
+
+<file path="apps/api/src/auth/dto/login.dto.ts">
+import { IsEmail, IsNotEmpty } from 'class-validator';
+
+export class LoginDto {
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  password: string;
+}
+</file>
+
+<file path="apps/api/src/auth/dto/register.dto.ts">
+import { IsEmail, IsEnum, IsNotEmpty, MinLength } from 'class-validator';
+import { Role } from '@prisma/client';
+
+export class RegisterDto {
+  @IsNotEmpty()
+  name: string;
+
+  @IsEmail()
+  email: string;
+
+  @MinLength(6)
+  password: string;
+
+  @IsEnum(Role)
+  role: Role;
+
+  phone?: string;
+}
+</file>
+
+<file path="apps/api/src/auth/auth.controller.ts">
+import { Body, Controller, Post } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
+
+@Controller('auth')
+export class AuthController {
+  constructor(private authService: AuthService) {}
+
+  @Post('register')
+  register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
+  }
+
+  @Post('login')
+  login(@Body() dto: LoginDto) {
+    return this.authService.login(dto);
+  }
+}
+</file>
+
+<file path="apps/api/src/auth/auth.service.ts">
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { PrismaService } from '../prisma/prisma.service';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
+import * as bcrypt from 'bcryptjs';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+  ) {}
+
+  async register(dto: RegisterDto) {
+    const exists = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (exists) throw new ConflictException('Email já cadastrado');
+
+    const hash = await bcrypt.hash(dto.password, 10);
+
+    const user = await this.prisma.user.create({
+      data: {
+        name: dto.name,
+        email: dto.email,
+        password: hash,
+        role: dto.role,
+        phone: dto.phone,
+      },
+    });
+
+    const token = this.jwt.sign({ sub: user.id, role: user.role });
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    };
+  }
+
+  async login(dto: LoginDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!user) throw new UnauthorizedException('Credenciais inválidas');
+
+    const valid = await bcrypt.compare(dto.password, user.password);
+    if (!valid) throw new UnauthorizedException('Credenciais inválidas');
+
+    const token = this.jwt.sign({ sub: user.id, role: user.role });
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    };
+  }
+}
+</file>
+
+<file path="apps/api/src/auth/jwt.strategy.ts">
+import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor() {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: process.env.JWT_SECRET || 'ecoloop_secret',
+    });
+  }
+
+  async validate(payload: any) {
+    return { userId: payload.sub, role: payload.role };
+  }
+}
+</file>
+
+<file path="apps/api/src/collections/dto/create-collection.dto.ts">
+// apps/api/src/collections/dto/create-collection.dto.ts
+import { IsArray, IsDateString, IsOptional, IsString } from 'class-validator';
+
+export class CreateCollectionDto {
+  @IsString()
+  address: string;
+
+  @IsDateString()
+  scheduledDate: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  items: string[];
+}
+</file>
+
+<file path="apps/api/src/collections/collections.controller.ts">
+// apps/api/src/collections/collections.controller.ts
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { CollectionsService } from './collections.service';
+import { CreateCollectionDto } from './dto/create-collection.dto';
+
+@UseGuards(AuthGuard('jwt'))
+@Controller('collections')
+export class CollectionsController {
+  constructor(private readonly collectionsService: CollectionsService) {}
+
+  @Post()
+  create(@Request() req, @Body() dto: CreateCollectionDto) {
+    return this.collectionsService.create(req.user.userId, dto);
+  }
+
+  @Get('pending')
+  findPending() {
+    return this.collectionsService.findPending();
+  }
+
+  @Get('my-accepted')
+  findMyAccepted(@Request() req) {
+    return this.collectionsService.findMyAccepted(req.user.userId);
+  }
+
+  @Patch(':id/accept')
+  accept(@Param('id') id: string, @Request() req) {
+    return this.collectionsService.accept(id, req.user.userId);
+  }
+
+  @Patch(':id/complete')
+  complete(@Param('id') id: string, @Request() req) {
+    return this.collectionsService.complete(id, req.user.userId);
+  }
+
+  @Get('my')
+  findMyCollections(@Request() req) {
+    return this.collectionsService.findMyCollections(req.user.userId);
+  }
+}
+</file>
+
+<file path="apps/api/src/collections/collections.module.ts">
+import { Module } from '@nestjs/common';
+import { CollectionsService } from './collections.service';
+import { CollectionsController } from './collections.controller';
+
+@Module({
+  providers: [CollectionsService],
+  controllers: [CollectionsController],
+})
+export class CollectionsModule {}
+</file>
+
+<file path="apps/api/src/collections/collections.service.ts">
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateCollectionDto } from './dto/create-collection.dto';
+
+@Injectable()
+export class CollectionsService {
+  constructor(private prisma: PrismaService) {}
+
+  // ==========================================
+  // LÓGICA DO CIDADÃO
+  // ==========================================
+
+  async create(citizenId: string, dto: CreateCollectionDto) {
+    return this.prisma.collection.create({
+      data: {
+        citizenId,
+        address: dto.address,
+        scheduledDate: new Date(dto.scheduledDate),
+        notes: dto.notes,
+        status: 'PENDING',
+        items: {
+          create: dto.items.map((item) => ({
+            name: item,
+            category: 'Eletrônico',
+          })),
+        },
+      },
+    });
+  }
+
+  async findMyCollections(citizenId: string) {
+    return this.prisma.collection.findMany({
+      where: { citizenId },
+      include: { items: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  // ==========================================
+  // LÓGICA DA COOPERATIVA
+  // ==========================================
+
+  // Função auxiliar: Garante que a cooperativa existe no banco
+  private async getOrCreateCooperative(userId: string) {
+    let cooperative = await this.prisma.cooperative.findUnique({
+      where: { userId },
+    });
+
+    // Se o usuário ainda não tem perfil de cooperativa, o sistema cria um automático para o MVP
+    if (!cooperative) {
+      cooperative = await this.prisma.cooperative.create({
+        data: {
+          userId,
+          cnpj: userId, // Usamos o ID como CNPJ provisório para garantir que seja único
+          address: 'Endereço da Cooperativa (Pendente)',
+          latitude: 0,
+          longitude: 0,
+        },
+      });
+    }
+    return cooperative;
+  }
+
+  async findPending() {
+    return this.prisma.collection.findMany({
+      where: { status: 'PENDING' },
+      include: { citizen: { select: { name: true } }, items: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async findMyAccepted(userId: string) {
+    // Busca o ID real da Cooperativa antes de consultar
+    const cooperative = await this.getOrCreateCooperative(userId);
+
+    return this.prisma.collection.findMany({
+      where: { cooperativeId: cooperative.id, status: 'ACCEPTED' },
+      include: { citizen: { select: { name: true } }, items: true },
+      orderBy: { scheduledDate: 'asc' },
+    });
+  }
+
+  async accept(id: string, userId: string) {
+    // Descobre qual é a Cooperativa vinculada a este usuário logado
+    const cooperative = await this.getOrCreateCooperative(userId);
+
+    return this.prisma.collection.update({
+      where: { id },
+      data: { status: 'ACCEPTED', cooperativeId: cooperative.id },
+    });
+  }
+
+  async complete(id: string, userId: string) {
+    const cooperative = await this.getOrCreateCooperative(userId);
+
+    return this.prisma.collection.update({
+      where: { id, cooperativeId: cooperative.id },
+      data: { status: 'COMPLETED' },
+    });
+  }
+}
+</file>
+
+<file path="apps/api/src/prisma/prisma.module.ts">
+import { Global, Module } from '@nestjs/common';
+import { PrismaService } from './prisma.service';
+
+@Global()
+@Module({
+  providers: [PrismaService],
+  exports: [PrismaService],
+})
+export class PrismaModule {}
+</file>
+
+<file path="apps/api/src/prisma/prisma.service.ts">
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
+
+@Injectable()
+export class PrismaService extends PrismaClient implements OnModuleInit {
+  async onModuleInit() {
+    await this.$connect();
+  }
+}
+</file>
+
+<file path="apps/api/src/app.controller.spec.ts">
+import { Test, TestingModule } from '@nestjs/testing';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+
+describe('AppController', () => {
+  let appController: AppController;
+
+  beforeEach(async () => {
+    const app: TestingModule = await Test.createTestingModule({
+      controllers: [AppController],
+      providers: [AppService],
+    }).compile();
+
+    appController = app.get<AppController>(AppController);
+  });
+
+  describe('root', () => {
+    it('should return "Hello World!"', () => {
+      expect(appController.getHello()).toBe('Hello World!');
+    });
+  });
+});
+</file>
+
+<file path="apps/api/src/app.controller.ts">
+import { Controller, Get } from '@nestjs/common';
+import { AppService } from './app.service';
+
+@Controller()
+export class AppController {
+  constructor(private readonly appService: AppService) {}
+
+  @Get()
+  getHello(): string {
+    return this.appService.getHello();
+  }
+}
+</file>
+
+<file path="apps/api/src/app.service.ts">
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class AppService {
+  getHello(): string {
+    return 'Hello World!';
+  }
+}
+</file>
+
+<file path="apps/api/src/main.ts">
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(new ValidationPipe());
+  app.enableCors();
+  await app.listen(3000);
+  console.log('API rodando em http://localhost:3000');
+}
+bootstrap();
+</file>
+
+<file path="apps/api/test/app.e2e-spec.ts">
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import request from 'supertest';
+import { App } from 'supertest/types';
+import { AppModule } from './../src/app.module';
+
+describe('AppController (e2e)', () => {
+  let app: INestApplication<App>;
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  it('/ (GET)', () => {
+    return request(app.getHttpServer())
+      .get('/')
+      .expect(200)
+      .expect('Hello World!');
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+});
+</file>
+
+<file path="apps/api/test/jest-e2e.json">
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  }
+}
+</file>
+
+<file path="apps/api/.gitignore">
+node_modules
+# Keep environment variables out of version control
+.env
+
+/generated/prisma
+</file>
+
+<file path="apps/api/.prettierrc">
+{
+  "singleQuote": true,
+  "trailingComma": "all"
+}
+</file>
+
+<file path="apps/api/eslint.config.mjs">
+// @ts-check
+import eslint from '@eslint/js';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
+
+export default tseslint.config(
+  {
+    ignores: ['eslint.config.mjs'],
+  },
+  eslint.configs.recommended,
+  ...tseslint.configs.recommendedTypeChecked,
+  eslintPluginPrettierRecommended,
+  {
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.jest,
+      },
+      sourceType: 'commonjs',
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+  {
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-floating-promises': 'warn',
+      '@typescript-eslint/no-unsafe-argument': 'warn',
+      "prettier/prettier": ["error", { endOfLine: "auto" }],
+    },
+  },
+);
+</file>
+
+<file path="apps/api/nest-cli.json">
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "compilerOptions": {
+    "deleteOutDir": true
+  }
+}
+</file>
+
+<file path="apps/api/package.json">
+{
+  "name": "api",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "nest build",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.3",
+    "@nestjs/core": "^11.0.1",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/passport": "^11.0.5",
+    "@nestjs/platform-express": "^11.0.1",
+    "@prisma/client": "^5.22.0",
+    "bcryptjs": "^3.0.3",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "prisma": "^5.22.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.18.0",
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/testing": "^11.0.1",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/express": "^5.0.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.0",
+    "@types/passport-jwt": "^4.0.1",
+    "@types/supertest": "^7.0.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.2",
+    "globals": "^17.0.0",
+    "jest": "^30.0.0",
+    "prettier": "^3.4.2",
+    "source-map-support": "^0.5.21",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
+    "ts-loader": "^9.5.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
+  }
+}
+</file>
+
+<file path="apps/api/README.md">
+<p align="center">
+  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+</p>
+
+[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
+[circleci-url]: https://circleci.com/gh/nestjs/nest
+
+  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
+    <p align="center">
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
+<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
+<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
+<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
+<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
+  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
+    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
+  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+</p>
+  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
+  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+
+## Description
+
+[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+
+## Project setup
+
+```bash
+$ npm install
+```
+
+## Compile and run the project
+
+```bash
+# development
+$ npm run start
+
+# watch mode
+$ npm run start:dev
+
+# production mode
+$ npm run start:prod
+```
+
+## Run tests
+
+```bash
+# unit tests
+$ npm run test
+
+# e2e tests
+$ npm run test:e2e
+
+# test coverage
+$ npm run test:cov
+```
+
+## Deployment
+
+When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+
+If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+
+```bash
+$ npm install -g @nestjs/mau
+$ mau deploy
+```
+
+With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+
+## Resources
+
+Check out a few resources that may come in handy when working with NestJS:
+
+- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
+- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
+- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
+- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
+- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
+- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
+- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
+- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+
+## Support
+
+Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+
+## Stay in touch
+
+- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
+- Website - [https://nestjs.com](https://nestjs.com/)
+- Twitter - [@nestframework](https://twitter.com/nestframework)
+
+## License
+
+Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+</file>
+
+<file path="apps/api/tsconfig.build.json">
+{
+  "extends": "./tsconfig.json",
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+}
+</file>
+
+<file path="apps/api/tsconfig.json">
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolvePackageJsonExports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false
+  }
+}
+</file>
+
+<file path="apps/web/public/favicon.svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="46" fill="none" viewBox="0 0 48 46"><path fill="#863bff" d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z" style="fill:#863bff;fill:color(display-p3 .5252 .23 1);fill-opacity:1"/><mask id="a" width="48" height="46" x="0" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha"><path fill="#000" d="M25.842 44.938c-.664.844-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.183c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.498 0-3.579-1.842-3.579H1.133c-.92 0-1.456-1.04-.92-1.787L9.91.473c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.578 1.842 3.578h11.377c.943 0 1.473 1.088.89 1.832L25.843 44.94z" style="fill:#000;fill-opacity:1"/></mask><g mask="url(#a)"><g filter="url(#b)"><ellipse cx="5.508" cy="14.704" fill="#ede6ff" rx="5.508" ry="14.704" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -4.47 31.516)"/></g><g filter="url(#c)"><ellipse cx="10.399" cy="29.851" fill="#ede6ff" rx="10.399" ry="29.851" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -39.328 7.883)"/></g><g filter="url(#d)"><ellipse cx="5.508" cy="30.487" fill="#7e14ff" rx="5.508" ry="30.487" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.814 -25.913 -14.639)scale(1 -1)"/></g><g filter="url(#e)"><ellipse cx="5.508" cy="30.599" fill="#7e14ff" rx="5.508" ry="30.599" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.814 -32.644 -3.334)scale(1 -1)"/></g><g filter="url(#f)"><ellipse cx="5.508" cy="30.599" fill="#7e14ff" rx="5.508" ry="30.599" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -34.34 30.47)"/></g><g filter="url(#g)"><ellipse cx="14.072" cy="22.078" fill="#ede6ff" rx="14.072" ry="22.078" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="rotate(93.35 24.506 48.493)scale(-1 1)"/></g><g filter="url(#h)"><ellipse cx="3.47" cy="21.501" fill="#7e14ff" rx="3.47" ry="21.501" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.009 28.708 47.59)scale(-1 1)"/></g><g filter="url(#i)"><ellipse cx="3.47" cy="21.501" fill="#7e14ff" rx="3.47" ry="21.501" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.009 28.708 47.59)scale(-1 1)"/></g><g filter="url(#j)"><ellipse cx=".387" cy="8.972" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(39.51 .387 8.972)"/></g><g filter="url(#k)"><ellipse cx="47.523" cy="-6.092" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 47.523 -6.092)"/></g><g filter="url(#l)"><ellipse cx="41.412" cy="6.333" fill="#47bfff" rx="5.971" ry="9.665" style="fill:#47bfff;fill:color(display-p3 .2799 .748 1);fill-opacity:1" transform="rotate(37.892 41.412 6.333)"/></g><g filter="url(#m)"><ellipse cx="-1.879" cy="38.332" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 -1.88 38.332)"/></g><g filter="url(#n)"><ellipse cx="-1.879" cy="38.332" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 -1.88 38.332)"/></g><g filter="url(#o)"><ellipse cx="35.651" cy="29.907" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 35.651 29.907)"/></g><g filter="url(#p)"><ellipse cx="38.418" cy="32.4" fill="#47bfff" rx="5.971" ry="15.297" style="fill:#47bfff;fill:color(display-p3 .2799 .748 1);fill-opacity:1" transform="rotate(37.892 38.418 32.4)"/></g></g><defs><filter id="b" width="60.045" height="41.654" x="-19.77" y="16.149" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="c" width="90.34" height="51.437" x="-54.613" y="-7.533" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="d" width="79.355" height="29.4" x="-49.64" y="2.03" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="e" width="79.579" height="29.4" x="-45.045" y="20.029" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="f" width="79.579" height="29.4" x="-43.513" y="21.178" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="g" width="74.749" height="58.852" x="15.756" y="-17.901" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="h" width="61.377" height="25.362" x="23.548" y="2.284" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="i" width="61.377" height="25.362" x="23.548" y="2.284" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="j" width="56.045" height="63.649" x="-27.636" y="-22.853" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="k" width="54.814" height="64.646" x="20.116" y="-38.415" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="l" width="33.541" height="35.313" x="24.641" y="-11.323" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="m" width="54.814" height="64.646" x="-29.286" y="6.009" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="n" width="54.814" height="64.646" x="-29.286" y="6.009" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="o" width="54.814" height="64.646" x="8.244" y="-2.416" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="p" width="39.409" height="43.623" x="18.713" y="10.588" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter></defs></svg>
+</file>
+
+<file path="apps/web/public/icons.svg">
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="bluesky-icon" viewBox="0 0 16 17">
+    <g clip-path="url(#bluesky-clip)"><path fill="#08060d" d="M7.75 7.735c-.693-1.348-2.58-3.86-4.334-5.097-1.68-1.187-2.32-.981-2.74-.79C.188 2.065.1 2.812.1 3.251s.241 3.602.398 4.13c.52 1.744 2.367 2.333 4.07 2.145-2.495.37-4.71 1.278-1.805 4.512 3.196 3.309 4.38-.71 4.987-2.746.608 2.036 1.307 5.91 4.93 2.746 2.72-2.746.747-4.143-1.747-4.512 1.702.189 3.55-.4 4.07-2.145.156-.528.397-3.691.397-4.13s-.088-1.186-.575-1.406c-.42-.19-1.06-.395-2.741.79-1.755 1.24-3.64 3.752-4.334 5.099"/></g>
+    <defs><clipPath id="bluesky-clip"><path fill="#fff" d="M.1.85h15.3v15.3H.1z"/></clipPath></defs>
+  </symbol>
+  <symbol id="discord-icon" viewBox="0 0 20 19">
+    <path fill="#08060d" d="M16.224 3.768a14.5 14.5 0 0 0-3.67-1.153c-.158.286-.343.67-.47.976a13.5 13.5 0 0 0-4.067 0c-.128-.306-.317-.69-.476-.976A14.4 14.4 0 0 0 3.868 3.77C1.546 7.28.916 10.703 1.231 14.077a14.7 14.7 0 0 0 4.5 2.306q.545-.748.965-1.587a9.5 9.5 0 0 1-1.518-.74q.191-.14.372-.293c2.927 1.369 6.107 1.369 8.999 0q.183.152.372.294-.723.437-1.52.74.418.838.963 1.588a14.6 14.6 0 0 0 4.504-2.308c.37-3.911-.63-7.302-2.644-10.309m-9.13 8.234c-.878 0-1.599-.82-1.599-1.82 0-.998.705-1.82 1.6-1.82.894 0 1.614.82 1.599 1.82.001 1-.705 1.82-1.6 1.82m5.91 0c-.878 0-1.599-.82-1.599-1.82 0-.998.705-1.82 1.6-1.82.893 0 1.614.82 1.599 1.82 0 1-.706 1.82-1.6 1.82"/>
+  </symbol>
+  <symbol id="documentation-icon" viewBox="0 0 21 20">
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="m15.5 13.333 1.533 1.322c.645.555.967.833.967 1.178s-.322.623-.967 1.179L15.5 18.333m-3.333-5-1.534 1.322c-.644.555-.966.833-.966 1.178s.322.623.966 1.179l1.534 1.321"/>
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M17.167 10.836v-4.32c0-1.41 0-2.117-.224-2.68-.359-.906-1.118-1.621-2.08-1.96-.599-.21-1.349-.21-2.848-.21-2.623 0-3.935 0-4.983.369-1.684.591-3.013 1.842-3.641 3.428C3 6.449 3 7.684 3 10.154v2.122c0 2.558 0 3.838.706 4.726q.306.383.713.671c.76.536 1.79.64 3.581.66"/>
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M3 10a2.78 2.78 0 0 1 2.778-2.778c.555 0 1.209.097 1.748-.047.48-.129.854-.503.982-.982.145-.54.048-1.194.048-1.749a2.78 2.78 0 0 1 2.777-2.777"/>
+  </symbol>
+  <symbol id="github-icon" viewBox="0 0 19 19">
+    <path fill="#08060d" fill-rule="evenodd" d="M9.356 1.85C5.05 1.85 1.57 5.356 1.57 9.694a7.84 7.84 0 0 0 5.324 7.44c.387.079.528-.168.528-.376 0-.182-.013-.805-.013-1.454-2.165.467-2.616-.935-2.616-.935-.349-.91-.864-1.143-.864-1.143-.71-.48.051-.48.051-.48.787.051 1.2.805 1.2.805.695 1.194 1.817.857 2.268.649.064-.507.27-.857.49-1.052-1.728-.182-3.545-.857-3.545-3.87 0-.857.31-1.558.8-2.104-.078-.195-.349-1 .077-2.078 0 0 .657-.208 2.14.805a7.5 7.5 0 0 1 1.946-.26c.657 0 1.328.092 1.946.26 1.483-1.013 2.14-.805 2.14-.805.426 1.078.155 1.883.078 2.078.502.546.799 1.247.799 2.104 0 3.013-1.818 3.675-3.558 3.87.284.247.528.714.528 1.454 0 1.052-.012 1.896-.012 2.156 0 .208.142.455.528.377a7.84 7.84 0 0 0 5.324-7.441c.013-4.338-3.48-7.844-7.773-7.844" clip-rule="evenodd"/>
+  </symbol>
+  <symbol id="social-icon" viewBox="0 0 20 20">
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M12.5 6.667a4.167 4.167 0 1 0-8.334 0 4.167 4.167 0 0 0 8.334 0"/>
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M2.5 16.667a5.833 5.833 0 0 1 8.75-5.053m3.837.474.513 1.035c.07.144.257.282.414.309l.93.155c.596.1.736.536.307.965l-.723.73a.64.64 0 0 0-.152.531l.207.903c.164.715-.213.991-.84.618l-.872-.52a.63.63 0 0 0-.577 0l-.872.52c-.624.373-1.003.094-.84-.618l.207-.903a.64.64 0 0 0-.152-.532l-.723-.729c-.426-.43-.289-.864.306-.964l.93-.156a.64.64 0 0 0 .412-.31l.513-1.034c.28-.562.735-.562 1.012 0"/>
+  </symbol>
+  <symbol id="x-icon" viewBox="0 0 19 19">
+    <path fill="#08060d" fill-rule="evenodd" d="M1.893 1.98c.052.072 1.245 1.769 2.653 3.77l2.892 4.114c.183.261.333.48.333.486s-.068.089-.152.183l-.522.593-.765.867-3.597 4.087c-.375.426-.734.834-.798.905a1 1 0 0 0-.118.148c0 .01.236.017.664.017h.663l.729-.83c.4-.457.796-.906.879-.999a692 692 0 0 0 1.794-2.038c.034-.037.301-.34.594-.675l.551-.624.345-.392a7 7 0 0 1 .34-.374c.006 0 .93 1.306 2.052 2.903l2.084 2.965.045.063h2.275c1.87 0 2.273-.003 2.266-.021-.008-.02-1.098-1.572-3.894-5.547-2.013-2.862-2.28-3.246-2.273-3.266.008-.019.282-.332 2.085-2.38l2-2.274 1.567-1.782c.022-.028-.016-.03-.65-.03h-.674l-.3.342a871 871 0 0 1-1.782 2.025c-.067.075-.405.458-.75.852a100 100 0 0 1-.803.91c-.148.172-.299.344-.99 1.127-.304.343-.32.358-.345.327-.015-.019-.904-1.282-1.976-2.808L6.365 1.85H1.8zm1.782.91 8.078 11.294c.772 1.08 1.413 1.973 1.425 1.984.016.017.241.02 1.05.017l1.03-.004-2.694-3.766L7.796 5.75 5.722 2.852l-1.039-.004-1.039-.004z" clip-rule="evenodd"/>
+  </symbol>
+</svg>
+</file>
+
+<file path="apps/web/src/assets/react.svg">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="35.93" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 228"><path fill="#00D8FF" d="M210.483 73.824a171.49 171.49 0 0 0-8.24-2.597c.465-1.9.893-3.777 1.273-5.621c6.238-30.281 2.16-54.676-11.769-62.708c-13.355-7.7-35.196.329-57.254 19.526a171.23 171.23 0 0 0-6.375 5.848a155.866 155.866 0 0 0-4.241-3.917C100.759 3.829 77.587-4.822 63.673 3.233C50.33 10.957 46.379 33.89 51.995 62.588a170.974 170.974 0 0 0 1.892 8.48c-3.28.932-6.445 1.924-9.474 2.98C17.309 83.498 0 98.307 0 113.668c0 15.865 18.582 31.778 46.812 41.427a145.52 145.52 0 0 0 6.921 2.165a167.467 167.467 0 0 0-2.01 9.138c-5.354 28.2-1.173 50.591 12.134 58.266c13.744 7.926 36.812-.22 59.273-19.855a145.567 145.567 0 0 0 5.342-4.923a168.064 168.064 0 0 0 6.92 6.314c21.758 18.722 43.246 26.282 56.54 18.586c13.731-7.949 18.194-32.003 12.4-61.268a145.016 145.016 0 0 0-1.535-6.842c1.62-.48 3.21-.974 4.76-1.488c29.348-9.723 48.443-25.443 48.443-41.52c0-15.417-17.868-30.326-45.517-39.844Zm-6.365 70.984c-1.4.463-2.836.91-4.3 1.345c-3.24-10.257-7.612-21.163-12.963-32.432c5.106-11 9.31-21.767 12.459-31.957c2.619.758 5.16 1.557 7.61 2.4c23.69 8.156 38.14 20.213 38.14 29.504c0 9.896-15.606 22.743-40.946 31.14Zm-10.514 20.834c2.562 12.94 2.927 24.64 1.23 33.787c-1.524 8.219-4.59 13.698-8.382 15.893c-8.067 4.67-25.32-1.4-43.927-17.412a156.726 156.726 0 0 1-6.437-5.87c7.214-7.889 14.423-17.06 21.459-27.246c12.376-1.098 24.068-2.894 34.671-5.345a134.17 134.17 0 0 1 1.386 6.193ZM87.276 214.515c-7.882 2.783-14.16 2.863-17.955.675c-8.075-4.657-11.432-22.636-6.853-46.752a156.923 156.923 0 0 1 1.869-8.499c10.486 2.32 22.093 3.988 34.498 4.994c7.084 9.967 14.501 19.128 21.976 27.15a134.668 134.668 0 0 1-4.877 4.492c-9.933 8.682-19.886 14.842-28.658 17.94ZM50.35 144.747c-12.483-4.267-22.792-9.812-29.858-15.863c-6.35-5.437-9.555-10.836-9.555-15.216c0-9.322 13.897-21.212 37.076-29.293c2.813-.98 5.757-1.905 8.812-2.773c3.204 10.42 7.406 21.315 12.477 32.332c-5.137 11.18-9.399 22.249-12.634 32.792a134.718 134.718 0 0 1-6.318-1.979Zm12.378-84.26c-4.811-24.587-1.616-43.134 6.425-47.789c8.564-4.958 27.502 2.111 47.463 19.835a144.318 144.318 0 0 1 3.841 3.545c-7.438 7.987-14.787 17.08-21.808 26.988c-12.04 1.116-23.565 2.908-34.161 5.309a160.342 160.342 0 0 1-1.76-7.887Zm110.427 27.268a347.8 347.8 0 0 0-7.785-12.803c8.168 1.033 15.994 2.404 23.343 4.08c-2.206 7.072-4.956 14.465-8.193 22.045a381.151 381.151 0 0 0-7.365-13.322Zm-45.032-43.861c5.044 5.465 10.096 11.566 15.065 18.186a322.04 322.04 0 0 0-30.257-.006c4.974-6.559 10.069-12.652 15.192-18.18ZM82.802 87.83a323.167 323.167 0 0 0-7.227 13.238c-3.184-7.553-5.909-14.98-8.134-22.152c7.304-1.634 15.093-2.97 23.209-3.984a321.524 321.524 0 0 0-7.848 12.897Zm8.081 65.352c-8.385-.936-16.291-2.203-23.593-3.793c2.26-7.3 5.045-14.885 8.298-22.6a321.187 321.187 0 0 0 7.257 13.246c2.594 4.48 5.28 8.868 8.038 13.147Zm37.542 31.03c-5.184-5.592-10.354-11.779-15.403-18.433c4.902.192 9.899.29 14.978.29c5.218 0 10.376-.117 15.453-.343c-4.985 6.774-10.018 12.97-15.028 18.486Zm52.198-57.817c3.422 7.8 6.306 15.345 8.596 22.52c-7.422 1.694-15.436 3.058-23.88 4.071a382.417 382.417 0 0 0 7.859-13.026a347.403 347.403 0 0 0 7.425-13.565Zm-16.898 8.101a358.557 358.557 0 0 1-12.281 19.815a329.4 329.4 0 0 1-23.444.823c-7.967 0-15.716-.248-23.178-.732a310.202 310.202 0 0 1-12.513-19.846h.001a307.41 307.41 0 0 1-10.923-20.627a310.278 310.278 0 0 1 10.89-20.637l-.001.001a307.318 307.318 0 0 1 12.413-19.761c7.613-.576 15.42-.876 23.31-.876H128c7.926 0 15.743.303 23.354.883a329.357 329.357 0 0 1 12.335 19.695a358.489 358.489 0 0 1 11.036 20.54a329.472 329.472 0 0 1-11 20.722Zm22.56-122.124c8.572 4.944 11.906 24.881 6.52 51.026c-.344 1.668-.73 3.367-1.15 5.09c-10.622-2.452-22.155-4.275-34.23-5.408c-7.034-10.017-14.323-19.124-21.64-27.008a160.789 160.789 0 0 1 5.888-5.4c18.9-16.447 36.564-22.941 44.612-18.3ZM128 90.808c12.625 0 22.86 10.235 22.86 22.86s-10.235 22.86-22.86 22.86s-22.86-10.235-22.86-22.86s10.235-22.86 22.86-22.86Z"></path></svg>
+</file>
+
+<file path="apps/web/src/assets/vite.svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="77" height="47" fill="none" aria-labelledby="vite-logo-title" viewBox="0 0 77 47"><title id="vite-logo-title">Vite</title><style>.parenthesis{fill:#000}@media (prefers-color-scheme:dark){.parenthesis{fill:#fff}}</style><path fill="#9135ff" d="M40.151 45.71c-.663.844-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.493c-.92 0-1.457-1.04-.92-1.788l7.479-10.471c1.07-1.498 0-3.578-1.842-3.578H15.443c-.92 0-1.456-1.04-.92-1.788l9.696-13.576c.213-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.472c-1.07 1.497 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.087.89 1.83L40.153 45.712z"/><mask id="a" width="48" height="47" x="14" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha"><path fill="#000" d="M40.047 45.71c-.663.843-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.389c-.92 0-1.457-1.04-.92-1.788l7.479-10.472c1.07-1.497 0-3.578-1.842-3.578H15.34c-.92 0-1.456-1.04-.92-1.788l9.696-13.575c.213-.297.556-.474.92-.474H53.93c.92 0 1.456 1.04.92 1.788L47.37 13.03c-1.07 1.498 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.088.89 1.831L40.049 45.712z"/></mask><g mask="url(#a)"><g filter="url(#b)"><ellipse cx="5.508" cy="14.704" fill="#eee6ff" rx="5.508" ry="14.704" transform="rotate(269.814 20.96 11.29)scale(-1 1)"/></g><g filter="url(#c)"><ellipse cx="10.399" cy="29.851" fill="#eee6ff" rx="10.399" ry="29.851" transform="rotate(89.814 -16.902 -8.275)scale(1 -1)"/></g><g filter="url(#d)"><ellipse cx="5.508" cy="30.487" fill="#8900ff" rx="5.508" ry="30.487" transform="rotate(89.814 -19.197 -7.127)scale(1 -1)"/></g><g filter="url(#e)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.928 4.177)scale(1 -1)"/></g><g filter="url(#f)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.738 5.52)scale(1 -1)"/></g><g filter="url(#g)"><ellipse cx="14.072" cy="22.078" fill="#eee6ff" rx="14.072" ry="22.078" transform="rotate(93.35 31.245 55.578)scale(-1 1)"/></g><g filter="url(#h)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#i)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#j)"><ellipse cx="14.592" cy="9.743" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(39.51 14.592 9.743)"/></g><g filter="url(#k)"><ellipse cx="61.728" cy="-5.321" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 61.728 -5.32)"/></g><g filter="url(#l)"><ellipse cx="55.618" cy="7.104" fill="#00c2ff" rx="5.971" ry="9.665" transform="rotate(37.892 55.618 7.104)"/></g><g filter="url(#m)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#n)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#o)"><ellipse cx="49.857" cy="30.678" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 49.857 30.678)"/></g><g filter="url(#p)"><ellipse cx="52.623" cy="33.171" fill="#00c2ff" rx="5.971" ry="15.297" transform="rotate(37.892 52.623 33.17)"/></g></g><path d="M6.919 0c-9.198 13.166-9.252 33.575 0 46.789h6.215c-9.25-13.214-9.196-33.623 0-46.789zm62.424 0h-6.215c9.198 13.166 9.252 33.575 0 46.789h6.215c9.25-13.214 9.196-33.623 0-46.789" class="parenthesis"/><defs><filter id="b" width="60.045" height="41.654" x="-5.564" y="16.92" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="c" width="90.34" height="51.437" x="-40.407" y="-6.762" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="d" width="79.355" height="29.4" x="-35.435" y="2.801" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="e" width="79.579" height="29.4" x="-30.84" y="20.8" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="f" width="79.579" height="29.4" x="-29.307" y="21.949" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="g" width="74.749" height="58.852" x="29.961" y="-17.13" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="h" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="i" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="j" width="56.045" height="63.649" x="-13.43" y="-22.082" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="k" width="54.814" height="64.646" x="34.321" y="-37.644" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="l" width="33.541" height="35.313" x="38.847" y="-10.552" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="m" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="n" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="o" width="54.814" height="64.646" x="22.45" y="-1.645" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="p" width="39.409" height="43.623" x="32.919" y="11.36" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter></defs></svg>
+</file>
+
+<file path="apps/web/src/pages/cooperative/CooperativeDashboard.jsx">
+import { useState, useEffect } from "react";
+import api from "../../services/api";
+
+export default function CooperativeDashboard({ user, onLogout }) {
+  const [tab, setTab] = useState("requests");
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [acceptedCollections, setAcceptedCollections] = useState([]);
+
+  useEffect(() => {
+    fetchCollections();
+  }, []);
+
+  const fetchCollections = async () => {
+    try {
+      const [pendingRes, acceptedRes] = await Promise.all([
+        api.get("/collections/pending"),
+        api.get("/collections/my-accepted"),
+      ]);
+      setPendingRequests(pendingRes.data);
+      setAcceptedCollections(acceptedRes.data);
+    } catch (error) {
+      console.error("Erro ao buscar coletas", error);
+    }
+  };
+
+  const handleAcceptRequest = async (request) => {
+    try {
+      await api.patch(`/collections/${request.id}/accept`);
+      fetchCollections();
+    } catch (error) {
+      alert("Erro ao aceitar a coleta.");
+    }
+  };
+
+  const handleCompleteCollection = async (id) => {
+    try {
+      await api.patch(`/collections/${id}/complete`);
+      fetchCollections();
+      alert("Coleta marcada como concluída com sucesso!");
+    } catch (error) {
+      alert("Erro ao concluir a coleta.");
+    }
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("pt-BR");
+  };
+
+  const formatTime = (dateString) => {
+    return new Date(dateString).toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-gray-50/50 flex flex-col font-sans selection:bg-green-100 selection:text-green-900 overflow-x-hidden">
+      {/* Header Premium */}
+      <header className="w-full bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-[90rem] mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-950 rounded-xl flex items-center justify-center font-bold text-green-400 text-xl shadow-inner">
+              E
+            </div>
+            <h1 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500 tracking-tight">
+              Eco<span className="text-gray-900">Loop</span>
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <span className="block text-sm font-semibold text-gray-950">
+                {user.name}
+              </span>
+              <span className="block text-xs text-amber-500 font-bold uppercase tracking-wider">
+                Cooperativa
+              </span>
+            </div>
+            <div className="w-11 h-11 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 font-bold text-lg ring-2 ring-gray-100">
+              {user.name.charAt(0).toUpperCase()}
+            </div>
+            <button
+              onClick={onLogout}
+              className="ml-2 text-sm font-semibold text-gray-500 hover:text-red-600 transition-colors bg-gray-100/70 px-4 py-2 rounded-full"
+            >
+              Sair
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-grow w-full max-w-[90rem] mx-auto p-6 md:p-8 space-y-10">
+        {/* Seção de Resumo */}
+        <section>
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-950 tracking-tight">
+              Painel Operacional
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Gerencie rotas de coleta, aceite solicitações e controle seu
+              estoque de recicláveis.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-1.5 transition-all hover:shadow-md hover:border-amber-100">
+              <span className="text-sm text-gray-400 font-medium">
+                Coletas na Rota Atual
+              </span>
+              <span className="text-3xl font-extrabold text-gray-950 tracking-tight">
+                {acceptedCollections.length}
+              </span>
+              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full self-start mt-1">
+                Em andamento
+              </span>
+            </div>
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-1.5 transition-all hover:shadow-md hover:border-amber-100">
+              <span className="text-sm text-gray-400 font-medium">
+                Volume Estimado
+              </span>
+              <span className="text-3xl font-extrabold text-gray-950 tracking-tight">
+                -- <span className="text-lg font-bold text-gray-400">kg</span>
+              </span>
+              <span className="text-xs font-semibold text-gray-600 bg-gray-50 px-2 py-0.5 rounded-full self-start mt-1">
+                Cálculo após pesagem
+              </span>
+            </div>
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-1.5 transition-all hover:shadow-md hover:border-amber-100">
+              <span className="text-sm text-gray-400 font-medium">
+                Novas Solicitações
+              </span>
+              <span className="text-3xl font-extrabold text-amber-500 tracking-tight">
+                {pendingRequests.length}
+              </span>
+              <span className="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full self-start mt-1">
+                Aguardando sua ação
+              </span>
+            </div>
+            <div className="bg-gray-900 p-6 rounded-3xl shadow-lg flex flex-col justify-between text-white transition-all hover:bg-black">
+              <span className="text-base font-bold leading-tight">
+                Vender para Empresa (B2B)
+              </span>
+              <button
+                className="bg-white text-gray-900 text-sm font-bold py-2 px-4 rounded-xl mt-3 self-start shadow-inner opacity-50 cursor-not-allowed"
+                title="Em breve"
+              >
+                Em breve
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Abas de Navegação */}
+        <div className="max-w-md mx-auto flex bg-gray-100/80 rounded-2xl p-1.5 border border-gray-200/50">
+          <button
+            onClick={() => setTab("requests")}
+            className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${tab === "requests" ? "bg-white text-gray-950 shadow ring-1 ring-black/5" : "text-gray-500 hover:text-gray-700"}`}
+          >
+            📋 Novas Solicitações
+            {pendingRequests.length > 0 && (
+              <span className="ml-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">
+                {pendingRequests.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setTab("accepted")}
+            className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${tab === "accepted" ? "bg-white text-gray-950 shadow ring-1 ring-black/5" : "text-gray-500 hover:text-gray-700"}`}
+          >
+            🚚 Minhas Coletas
+          </button>
+        </div>
+
+        {/* Conteúdo das Abas */}
+        {tab === "requests" && (
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 animate-in fade-in duration-300 max-w-5xl mx-auto">
+            <div className="mb-8">
+              <h2 className="text-2xl font-extrabold text-gray-950 tracking-tight">
+                Solicitações de Descarte
+              </h2>
+              <p className="text-base text-gray-500 mt-1.5 leading-relaxed">
+                Revise os pedidos dos cidadãos e aceite aqueles que se encaixam
+                na sua rota de hoje.
+              </p>
+            </div>
+
+            {pendingRequests.length === 0 ? (
+              <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                <p className="text-gray-500 font-medium">
+                  Nenhuma nova solicitação no momento.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {pendingRequests.map((req) => (
+                  <div
+                    key={req.id}
+                    className="grid grid-cols-1 lg:grid-cols-[1fr,auto,auto] items-center gap-6 p-5 border border-gray-100 rounded-2xl hover:border-amber-200 hover:bg-gray-50/50 transition-all"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="font-bold text-gray-950 text-base">
+                          {req.citizen?.name}
+                        </p>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                          Novo
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500 mb-2">
+                        📍 {req.address}
+                      </p>
+
+                      {/* Renderiza a lista de itens vinda do banco de dados */}
+                      <div className="flex flex-wrap gap-2">
+                        {req.items?.map((item, i) => (
+                          <span
+                            key={i}
+                            className="text-xs text-gray-600 bg-gray-100 font-medium px-2 py-1 rounded-lg border border-gray-200"
+                          >
+                            {item.name}
+                          </span>
+                        ))}
+                      </div>
+
+                      {req.notes && (
+                        <p className="mt-2 text-xs text-gray-400 italic">
+                          " {req.notes} "
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center min-w-[120px]">
+                      <p className="text-xs text-gray-400 font-semibold uppercase mb-1">
+                        Agendado para
+                      </p>
+                      <p className="font-bold text-gray-800 text-sm">
+                        {formatDate(req.scheduledDate)}
+                      </p>
+                      <p className="font-bold text-emerald-600 text-sm">
+                        às {formatTime(req.scheduledDate)}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => handleAcceptRequest(req)}
+                      className="w-full lg:w-auto bg-gray-900 hover:bg-black text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-md active:scale-[0.98]"
+                    >
+                      Aceitar Coleta
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === "accepted" && (
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 animate-in fade-in duration-300 max-w-5xl mx-auto">
+            <div className="mb-8 flex justify-between items-end">
+              <div>
+                <h2 className="text-2xl font-extrabold text-gray-950 tracking-tight">
+                  Sua Rota de Coletas
+                </h2>
+                <p className="text-base text-gray-500 mt-1.5 leading-relaxed">
+                  Gerencie as coletas que você aceitou.
+                </p>
+              </div>
+            </div>
+
+            {acceptedCollections.length === 0 ? (
+              <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                <p className="text-gray-500 font-medium">
+                  Você ainda não aceitou nenhuma coleta.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {acceptedCollections.map((req) => (
+                  <div
+                    key={req.id}
+                    className="flex flex-col lg:flex-row items-center justify-between gap-6 p-5 border-2 border-emerald-100 bg-emerald-50/30 rounded-2xl transition-all"
+                  >
+                    <div className="flex-1">
+                      <p className="font-bold text-gray-950 text-base">
+                        {req.citizen?.name}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-0.5">
+                        📍 {req.address}
+                      </p>
+                      <div className="flex gap-2 mt-2 text-xs text-emerald-800 font-medium">
+                        {req.items?.map((item, i) => (
+                          <span key={i}>
+                            {item.name}
+                            {i < req.items.length - 1 ? ", " : ""}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="text-sm font-semibold text-emerald-700 mt-3">
+                        Coletar dia {formatDate(req.scheduledDate)} às{" "}
+                        {formatTime(req.scheduledDate)}
+                      </p>
+                    </div>
+
+                    <div className="flex w-full lg:w-auto gap-3">
+                      <button
+                        onClick={() => handleCompleteCollection(req.id)}
+                        className="flex-1 lg:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md active:scale-[0.98] text-sm"
+                      >
+                        ✅ Concluir Coleta
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+</file>
+
+<file path="apps/web/src/App.css">
+.counter {
+  font-size: 16px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.hero {
+  position: relative;
+
+  .base,
+  .framework,
+  .vite {
+    inset-inline: 0;
+    margin: 0 auto;
+  }
+
+  .base {
+    width: 170px;
+    position: relative;
+    z-index: 0;
+  }
+
+  .framework,
+  .vite {
+    position: absolute;
+  }
+
+  .framework {
+    z-index: 1;
+    top: 34px;
+    height: 28px;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
+      scale(1.4);
+  }
+
+  .vite {
+    z-index: 0;
+    top: 107px;
+    height: 26px;
+    width: auto;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
+      scale(0.8);
+  }
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+
+  & > div {
+    flex: 1 1 0;
+    padding: 32px;
+    @media (max-width: 1024px) {
+      padding: 24px 20px;
+    }
+  }
+
+  .icon {
+    margin-bottom: 16px;
+    width: 22px;
+    height: 22px;
+  }
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+#docs {
+  border-right: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+#next-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  margin: 32px 0 0;
+
+  .logo {
+    height: 18px;
+  }
+
+  a {
+    color: var(--text-h);
+    font-size: 16px;
+    border-radius: 6px;
+    background: var(--social-bg);
+    display: flex;
+    padding: 6px 12px;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: var(--shadow);
+    }
+    .button-icon {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    li {
+      flex: 1 1 calc(50% - 8px);
+    }
+
+    a {
+      width: 100%;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+  }
+}
+
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+  @media (max-width: 1024px) {
+    height: 48px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4.5px;
+    border: 5px solid transparent;
+  }
+
+  &::before {
+    left: 0;
+    border-left-color: var(--border);
+  }
+  &::after {
+    right: 0;
+    border-right-color: var(--border);
+  }
+}
+</file>
+
+<file path="apps/web/src/main.jsx">
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+</file>
+
+<file path="apps/web/.gitignore">
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+/src/generated/prisma
+</file>
+
+<file path="apps/web/eslint.config.js">
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{js,jsx}'],
+    extends: [
+      js.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+    },
+  },
+])
+</file>
+
+<file path="apps/web/index.html">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>web</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+</file>
+
+<file path="apps/web/postcss.config.js">
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+</file>
+
+<file path="apps/web/prisma.config.ts">
+// This file was generated by Prisma, and assumes you have installed the following:
+// npm install --save-dev prisma dotenv
+import "dotenv/config";
+import { defineConfig } from "prisma/config";
+
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  migrations: {
+    path: "prisma/migrations",
+  },
+  datasource: {
+    url: process.env["DATABASE_URL"],
+  },
+});
+</file>
+
+<file path="apps/web/README.md">
+# React + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+</file>
+
+<file path="apps/web/tailwind.config.js">
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+</file>
+
+<file path="apps/web/vite.config.js">
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react()],
+})
+</file>
+
+<file path="package.json">
+{
+  "name": "ecoloop",
+  "private": true,
+  "scripts": {
+    "dev:api": "cd apps/api && npm run start:dev",
+    "dev:web": "cd apps/web && npm run dev",
+    "migrate": "cd apps/api && npx prisma migrate dev",
+    "studio": "cd apps/api && npx prisma studio"
+  }
+}
+</file>
+
+<file path="README.md">
+
+</file>
+
+<file path="apps/api/src/auth/auth.module.ts">
+// apps/api/src/auth/auth.module.ts
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
+import { JwtStrategy } from './jwt.strategy';
+
+@Module({
+  imports: [
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'ecoloop_secret',
+      signOptions: { expiresIn: '7d' },
+    }),
+  ],
+  providers: [AuthService, JwtStrategy],
+  controllers: [AuthController],
+})
+export class AuthModule {}
+</file>
+
+<file path="apps/api/src/app.module.ts">
+// apps/api/src/app.module.ts
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './auth/auth.module';
+import { CollectionsModule } from './collections/collections.module'; // 1. Adicione esta linha
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
+    AuthModule,
+    CollectionsModule, // 2. Adicione o módulo aqui
+  ],
+})
+export class AppModule {}
+</file>
+
+<file path="apps/web/src/pages/auth/AuthPage.jsx">
+import { useState } from "react";
+import api from "../../services/api";
+
+export default function AuthPage({ onLogin }) {
+  const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "CITIZEN",
+  });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setError("");
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const endpoint = isLogin ? "/auth/login" : "/auth/register";
+      const payload = isLogin
+        ? { email: form.email, password: form.password }
+        : form;
+      const { data } = await api.post(endpoint, payload);
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      onLogin(data.user);
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Erro ao conectar com o servidor",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen w-full bg-white font-sans">
+      {/* Lado Esquerdo - Branding (Visível apenas em telas grandes) */}
+      <div className="relative hidden lg:flex w-1/2 bg-green-950 flex-col justify-between p-12 overflow-hidden">
+        {/* Efeitos de fundo (Círculos desfocados) */}
+        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-green-600/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[30rem] h-[30rem] bg-emerald-500/20 rounded-full blur-3xl"></div>
+
+        {/* Logo Topo */}
+        <div className="relative z-10">
+          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-200 tracking-tight">
+            Eco<span className="text-white">Loop</span>
+          </h1>
+        </div>
+
+        {/* Mensagem Central */}
+        <div className="relative z-10 mb-20">
+          <h2 className="text-5xl font-bold text-white leading-[1.15] tracking-tight mb-6">
+            O futuro do descarte <br /> começa aqui.
+          </h2>
+          <p className="text-green-200/80 text-lg max-w-md leading-relaxed font-medium">
+            Conectamos cidadãos, cooperativas e empresas para um ciclo de vida
+            eletrônico inteligente e responsável.
+          </p>
+        </div>
+
+        {/* Rodapé Esquerdo */}
+        <div className="relative z-10 text-green-400/60 text-sm font-medium">
+          © {new Date().getFullYear()} EcoLoop. Todos os direitos reservados.
+        </div>
+      </div>
+
+      {/* Lado Direito - Formulário */}
+      <div className="flex w-full lg:w-1/2 items-center justify-center p-6 sm:p-12">
+        <div className="w-full max-w-md">
+          {/* Cabeçalho do Mobile (Aparece só em telas pequenas) */}
+          <div className="lg:hidden text-center mb-10">
+            <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500 tracking-tight">
+              Eco<span className="text-gray-900">Loop</span>
+            </h1>
+            <p className="text-gray-500 mt-2 text-base font-medium">
+              Plataforma de descarte responsável
+            </p>
+          </div>
+
+          <div className="mb-8">
+            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+              {isLogin ? "Bem-vindo de volta" : "Crie sua conta"}
+            </h3>
+            <p className="text-gray-500 mt-2 text-base">
+              {isLogin
+                ? "Insira seus dados para acessar o seu painel."
+                : "Preencha os dados abaixo para começar a reciclar."}
+            </p>
+          </div>
+
+          {/* Toggle estilo iOS (Segmented Control) */}
+          <div className="flex bg-gray-100/80 rounded-xl p-1 mb-8 border border-gray-200/50">
+            <button
+              type="button"
+              onClick={() => setIsLogin(true)}
+              className={`flex-1 py-2.5 rounded-lg text-base font-semibold transition-all duration-300 ${
+                isLogin
+                  ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+              }`}
+            >
+              Entrar
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsLogin(false)}
+              className={`flex-1 py-2.5 rounded-lg text-base font-semibold transition-all duration-300 ${
+                !isLogin
+                  ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+              }`}
+            >
+              Cadastrar
+            </button>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+            {!isLogin && (
+              <div>
+                <label className="block text-base font-semibold text-gray-700 mb-1.5 ml-1">
+                  Nome completo
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  placeholder="Ex: João da Silva"
+                  required
+                  className="w-full px-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl text-base transition-all duration-200 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500"
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="block text-base font-semibold text-gray-700 mb-1.5 ml-1">
+                Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="joao@email.com"
+                required
+                className="w-full px-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl text-base transition-all duration-200 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-base font-semibold text-gray-700 mb-1.5 ml-1">
+                Senha
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                required
+                className="w-full px-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl text-base transition-all duration-200 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500"
+              />
+            </div>
+
+            {!isLogin && (
+              <div>
+                <label className="block text-base font-semibold text-gray-700 mb-1.5 ml-1">
+                  Tipo de conta
+                </label>
+                <select
+                  name="role"
+                  value={form.role}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl text-base transition-all duration-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 cursor-pointer appearance-none"
+                >
+                  <option value="CITIZEN">Cidadão (Quero descartar)</option>
+                  <option value="COOPERATIVE">
+                    Cooperativa (Ponto de coleta)
+                  </option>
+                  <option value="COMPANY">Empresa (Descarte em massa)</option>
+                </select>
+              </div>
+            )}
+
+            {error && (
+              <div className="bg-red-50 border border-red-100 text-red-600 text-base px-4 py-3.5 rounded-xl font-medium animate-in slide-in-from-top-1">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gray-900 hover:bg-gray-800 active:bg-black text-white font-semibold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-gray-900/20 disabled:opacity-70 disabled:cursor-not-allowed text-base mt-4 transform active:scale-[0.99]"
+            >
+              {loading
+                ? "Processando..."
+                : isLogin
+                  ? "Entrar na plataforma"
+                  : "Criar conta gratuitamente"}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="apps/web/src/services/api.js">
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
+    return Promise.reject(error);
+  },
+);
+
+export default api;
+</file>
+
+<file path="apps/web/src/index.css">
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Garantir que o html, body e o root do React ocupem 100% da tela */
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: #f9fafb; /* Cor padrão de fundo (gray-50 do Tailwind) */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+</file>
+
+<file path="apps/web/package.json">
+{
+  "name": "web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.14.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "autoprefixer": "^10.4.27",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^3.4.19",
+    "vite": "^8.0.1"
+  }
+}
+</file>
+
+<file path=".gitignore">
+node_modules/
+dist/
+.env
+*.log
+repomix-output.txt
+.DS_Store
+Thumbs.db
+coverage/
+.nest/
+</file>
+
+<file path="apps/web/src/pages/citizen/CitizenDashboard.jsx">
+import { useState, useEffect } from "react";
+import api from "../../services/api";
+
+export default function CitizenDashboard({ user, onLogout }) {
+  const [tab, setTab] = useState("schedule");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  // Novos estados para os dados dinâmicos
+  const [myCollections, setMyCollections] = useState([]);
+  const [stats, setStats] = useState({ recycled: 0, pending: 0, points: 0 });
+
+  const [form, setForm] = useState({
+    address: "",
+    scheduledDate: "",
+    scheduledTime: "",
+    notes: "",
+    items: [],
+  });
+
+  const itemOptions = [
+    { id: "smartphone", label: "Smartphone" },
+    { id: "notebook", label: "Notebook" },
+    { id: "tv", label: "TV" },
+    { id: "geladeira", label: "Geladeira" },
+    { id: "impressora", label: "Impressora" },
+    { id: "tablet", label: "Tablet" },
+    { id: "cabos", label: "Cabos" },
+    { id: "bateria", label: "Bateria" },
+  ];
+
+  // Busca os dados reais ao carregar a página
+  useEffect(() => {
+    fetchMyData();
+  }, []);
+
+  const fetchMyData = async () => {
+    try {
+      const { data } = await api.get("/collections/my");
+      setMyCollections(data);
+
+      // Calculando as estatísticas dinamicamente
+      const pendingCount = data.filter((c) => c.status === "PENDING").length;
+      const completedCount = data.filter(
+        (c) => c.status === "COMPLETED",
+      ).length;
+
+      // Simulação: Vamos fingir que cada coleta finalizada gerou em média 25kg e rendeu 350 pontos
+      setStats({
+        recycled: completedCount * 25,
+        pending: pendingCount,
+        points: completedCount * 350,
+      });
+    } catch (error) {
+      console.error("Erro ao buscar dados do cidadão", error);
+    }
+  };
+
+  const toggleItem = (id) => {
+    setForm((prev) => ({
+      ...prev,
+      items: prev.items.includes(id)
+        ? prev.items.filter((i) => i !== id)
+        : [...prev.items, id],
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const dateTimeString = `${form.scheduledDate}T${form.scheduledTime}:00`;
+
+      await api.post("/collections", {
+        address: form.address,
+        scheduledDate: new Date(dateTimeString).toISOString(),
+        notes: form.notes,
+        items: form.items,
+      });
+
+      setSuccess(true);
+      setForm({
+        address: "",
+        scheduledDate: "",
+        scheduledTime: "",
+        notes: "",
+        items: [],
+      });
+      setTimeout(() => setSuccess(false), 4000);
+
+      // Atualiza os cards dinamicamente após criar uma nova coleta
+      fetchMyData();
+    } catch (err) {
+      alert("Erro ao agendar a coleta. Verifique os dados e tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-gray-50/50 flex flex-col font-sans selection:bg-green-100 selection:text-green-900 overflow-x-hidden">
+      {/* Header Premium (Ocupa 100% da largura) */}
+      <header className="w-full bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-[90rem] mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-950 rounded-xl flex items-center justify-center font-bold text-green-400 text-xl shadow-inner">
+              E
+            </div>
+            <h1 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500 tracking-tight">
+              Eco<span className="text-gray-900">Loop</span>
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <span className="block text-sm font-semibold text-gray-950">
+                {user.name}
+              </span>
+              <span className="block text-xs text-gray-400 font-medium">
+                Cidadão Consciente
+              </span>
+            </div>
+            <div className="w-11 h-11 bg-gray-900 rounded-full flex items-center justify-center text-white font-bold text-lg ring-2 ring-gray-100">
+              {user.name.charAt(0).toUpperCase()}
+            </div>
+            <button
+              onClick={onLogout}
+              className="ml-2 text-sm font-semibold text-gray-500 hover:text-red-600 transition-colors bg-gray-100/70 px-4 py-2 rounded-full"
+            >
+              Sair
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-grow w-full max-w-[90rem] mx-auto p-6 md:p-8 space-y-10">
+        {/* Seção de Resumo com DADOS DINÂMICOS */}
+        <section>
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-950 tracking-tight">
+              Bem-vindo ao seu Dashboard
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Aqui você gerencia o seu descarte eletrônico e monitora seu
+              impacto.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-1.5 transition-all hover:shadow-md hover:border-green-100">
+              <span className="text-sm text-gray-400 font-medium">
+                Total Reciclado Estimado
+              </span>
+              <span className="text-3xl font-extrabold text-gray-950 tracking-tight">
+                {stats.recycled}{" "}
+                <span className="text-lg font-bold text-gray-400">kg</span>
+              </span>
+              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full self-start mt-1">
+                Atualizado hoje
+              </span>
+            </div>
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-1.5 transition-all hover:shadow-md hover:border-green-100">
+              <span className="text-sm text-gray-400 font-medium">
+                Agendamentos Pendentes
+              </span>
+              <span className="text-3xl font-extrabold text-gray-950 tracking-tight">
+                {stats.pending.toString().padStart(2, "0")}{" "}
+                <span className="text-lg font-bold text-gray-400">coletas</span>
+              </span>
+              <span className="text-xs font-semibold text-gray-600 bg-gray-50 px-2 py-0.5 rounded-full self-start mt-1">
+                Aguardando cooperativa
+              </span>
+            </div>
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-1.5 transition-all hover:shadow-md hover:border-green-100">
+              <span className="text-sm text-gray-400 font-medium">
+                Pontos Gerados
+              </span>
+              <span className="text-3xl font-extrabold text-emerald-600 tracking-tight">
+                {stats.points}{" "}
+                <span className="text-lg font-bold text-emerald-400">pts</span>
+              </span>
+              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full self-start mt-1">
+                Resgatável em breve
+              </span>
+            </div>
+            <div className="bg-green-600 p-6 rounded-3xl shadow-lg flex flex-col justify-between text-white transition-all hover:bg-green-700">
+              <span className="text-base font-bold leading-tight">
+                Pronto para o próximo descarte?
+              </span>
+              <button
+                onClick={() => setTab("schedule")}
+                className="bg-white text-green-700 text-sm font-bold py-2 px-4 rounded-xl mt-3 self-start shadow-inner hover:bg-green-50 transition-colors"
+              >
+                Novo Agendamento
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* ... Restante do JSX (Abas e Formulário continuam iguais) ... */}
+        {/* Abas de Navegação (iOS style) */}
+        <div className="max-w-md mx-auto flex bg-gray-100/80 rounded-2xl p-1.5 border border-gray-200/50">
+          <button
+            onClick={() => setTab("schedule")}
+            className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${tab === "schedule" ? "bg-white text-gray-950 shadow ring-1 ring-black/5" : "text-gray-500 hover:text-gray-700"}`}
+          >
+            🗓️ Agendar Coleta
+          </button>
+          <button
+            onClick={() => setTab("points")}
+            className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${tab === "points" ? "bg-white text-gray-950 shadow ring-1 ring-black/5" : "text-gray-500 hover:text-gray-700"}`}
+          >
+            📍 Pontos de Coleta
+          </button>
+        </div>
+
+        {/* Conteúdo das Abas */}
+        {tab === "schedule" && (
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 animate-in fade-in duration-300 max-w-5xl mx-auto">
+            <div className="mb-8">
+              <h2 className="text-2xl font-extrabold text-gray-950 tracking-tight">
+                Nova solicitação de coleta domiciliar
+              </h2>
+              <p className="text-base text-gray-500 mt-1.5 leading-relaxed max-w-2xl">
+                Preencha os dados abaixo e as cooperativas parceiras serão
+                notificadas para agendar a retirada dos seus eletrônicos na sua
+                residência.
+              </p>
+            </div>
+
+            {success && (
+              <div className="bg-emerald-50 border border-emerald-100 text-emerald-800 text-base px-5 py-4 rounded-2xl mb-6 font-semibold animate-in slide-in-from-top-2">
+                Coleta agendada com sucesso! Você pode acompanhar o status nos
+                seus cards acima.
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-7">
+              <div>
+                <label className="block text-base font-semibold text-gray-700 mb-2.5 ml-1">
+                  Selecione os itens para descartar
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+                  {itemOptions.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => toggleItem(item.id)}
+                      className={`px-4 py-3 rounded-xl text-sm font-medium border transition-all duration-200 text-center flex items-center justify-center ${form.items.includes(item.id) ? "bg-green-600 text-white border-green-600 shadow-md shadow-green-600/20" : "bg-white text-gray-700 border-gray-200 hover:border-green-300"}`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-base font-semibold text-gray-700 mb-1.5 ml-1">
+                  Endereço completo para retirada
+                </label>
+                <input
+                  type="text"
+                  value={form.address}
+                  onChange={(e) =>
+                    setForm({ ...form, address: e.target.value })
+                  }
+                  placeholder="Rua, número, bairro, cidade (ex: Rua Floriano Peixoto, 123 - Centro)"
+                  required
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-base transition-all duration-200 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-base font-semibold text-gray-700 mb-1.5 ml-1">
+                    Melhor data para retirada
+                  </label>
+                  <input
+                    type="date"
+                    value={form.scheduledDate}
+                    onChange={(e) =>
+                      setForm({ ...form, scheduledDate: e.target.value })
+                    }
+                    required
+                    min={new Date().toISOString().split("T")[0]}
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-base transition-all duration-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <label className="block text-base font-semibold text-gray-700 mb-1.5 ml-1">
+                    Melhor horário
+                  </label>
+                  <select
+                    value={form.scheduledTime}
+                    onChange={(e) =>
+                      setForm({ ...form, scheduledTime: e.target.value })
+                    }
+                    required
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-base transition-all duration-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 cursor-pointer appearance-none"
+                  >
+                    <option value="">Selecione um horário</option>
+                    <option value="08:00">08:00</option>
+                    <option value="09:00">09:00</option>
+                    <option value="10:00">10:00</option>
+                    <option value="11:00">11:00</option>
+                    <option value="13:00">13:00</option>
+                    <option value="14:00">14:00</option>
+                    <option value="15:00">15:00</option>
+                    <option value="16:00">16:00</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-base font-semibold text-gray-700 mb-1.5 ml-1">
+                  Observações (opcional)
+                </label>
+                <textarea
+                  value={form.notes}
+                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                  placeholder="Ex: portão azul, ligar antes de chegar, itens pesados..."
+                  rows={4}
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-base transition-all duration-200 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 resize-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || form.items.length === 0}
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 active:bg-green-700 text-white font-bold py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-green-600/30 disabled:opacity-60 disabled:cursor-not-allowed text-base mt-2 transform active:scale-[0.99]"
+              >
+                {loading
+                  ? "Processando Agendamento..."
+                  : "Confirmar Solicitação de Coleta"}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {tab === "points" && (
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 animate-in fade-in duration-300 max-w-5xl mx-auto">
+            <div className="mb-8 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-extrabold text-gray-950 tracking-tight">
+                  Pontos de Coleta Cadastrados (Fictícios)
+                </h2>
+                <p className="text-base text-gray-500 mt-1.5 leading-relaxed">
+                  Leve seus eletrônicos diretamente a um ponto de coleta
+                  credenciado e ganhe pontos extra.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {[
+                {
+                  name: "Cooperativa Verde Manaus (Fictício)",
+                  address: "Av. Brasil, 1234 - Centro",
+                  distance: "1.2 km",
+                  items: "Todos os eletrônicos",
+                },
+                {
+                  name: "EcoPoint Adrianópolis (Fictício)",
+                  address: "Rua 10 de Julho, 567",
+                  distance: "2.8 km",
+                  items: "Celulares, tablets, notebooks",
+                },
+              ].map((point, i) => (
+                <div
+                  key={i}
+                  className="grid grid-cols-1 md:grid-cols-[auto,1fr,auto] items-center gap-5 p-5 border border-gray-100 rounded-2xl hover:border-green-200 hover:bg-gray-50/50 transition-all cursor-pointer"
+                >
+                  <div className="w-12 h-12 bg-green-100/70 rounded-2xl flex items-center justify-center flex-shrink-0 text-green-700 font-bold text-lg shadow-inner">
+                    ♻️
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-950 text-base">
+                      {point.name}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      {point.address}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className="text-sm font-semibold text-green-700 bg-green-100/70 px-3 py-1 rounded-xl">
+                      {point.distance}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+</file>
+
+<file path="apps/web/src/App.jsx">
+import { useState, useEffect } from "react";
+import AuthPage from "./pages/auth/AuthPage";
+import CitizenDashboard from "./pages/citizen/CitizenDashboard";
+import CooperativeDashboard from "./pages/cooperative/CooperativeDashboard";
+
+export default function App() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("user");
+    if (saved) setUser(JSON.parse(saved));
+  }, []);
+
+  const handleLogin = (userData) => setUser(userData);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+  };
+
+  if (!user) return <AuthPage onLogin={handleLogin} />;
+
+  if (user.role === "CITIZEN") {
+    return <CitizenDashboard user={user} onLogout={handleLogout} />;
+  }
+
+  if (user.role === "COOPERATIVE") {
+    return <CooperativeDashboard user={user} onLogout={handleLogout} />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-green-700">Olá, {user.name}!</h2>
+        <p className="text-gray-500 mt-1">{user.role} — painel em construção</p>
+        <button
+          onClick={handleLogout}
+          className="mt-4 px-6 py-2 bg-red-100 text-red-600 rounded-xl text-sm"
+        >
+          Sair
+        </button>
+      </div>
+    </div>
+  );
+}
+</file>
+
+</files>
